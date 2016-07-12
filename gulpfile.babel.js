@@ -38,12 +38,12 @@ const $ = gulpLoadPlugins();
 const reload = browserSync.reload;
 
 // Lint JavaScript
-gulp.task('lint', () =>
-  gulp.src('app/scripts/**/*.js')
-    .pipe($.eslint())
-    .pipe($.eslint.format())
-    .pipe($.if(!browserSync.active, $.eslint.failOnError()))
-);
+// gulp.task('lint', () =>
+//   gulp.src('app/scripts/**/*.js')
+//     .pipe($.eslint())
+//     .pipe($.eslint.format())
+//     .pipe($.if(!browserSync.active, $.eslint.failOnError()))
+// );
 
 // Optimize images
 gulp.task('images', () =>
@@ -65,6 +65,12 @@ gulp.task('copy', () =>
   ], {
     dot: true
   }).pipe(gulp.dest('dist'))
+    .pipe($.size({title: 'copy'}))
+    .pipe(gulp.src([
+    'app/fonts/*'
+  ], {
+    dot: true
+  })).pipe(gulp.dest('dist/fonts'))
     .pipe($.size({title: 'copy'}))
 );
 
@@ -109,11 +115,10 @@ gulp.task('scripts', () =>
       // Note: Since we are not using useref in the scripts build pipeline,
       //       you need to explicitly list your scripts here in the right order
       //       to be correctly concatenated
-      './app/scripts/main.js'
-      './app/scripts/bootstrap.js'
-      './app/scripts/jquery-2.2.1.min.js'
-      './app/scripts/modernizr.js'
-      './app/scripts/wow.min.js'
+      './app/scripts/jquery-2.2.1.min.js',
+      './app/scripts/modernizr.js',
+      './app/scripts/bootstrap.min.js',
+      './app/scripts/wow.min.js',
       './app/scripts/main.js'
       // Other scripts
     ])
@@ -176,7 +181,7 @@ gulp.task('serve', ['scripts', 'styles'], () => {
 
   gulp.watch(['app/**/*.html'], reload);
   gulp.watch(['app/styles/**/*.{scss,css}'], ['styles', reload]);
-  gulp.watch(['app/scripts/**/*.js'], ['lint', 'scripts', reload]);
+  gulp.watch(['app/scripts/**/*.js'], [ 'scripts', reload]);
   gulp.watch(['app/images/**/*'], reload);
 });
 
@@ -200,7 +205,7 @@ gulp.task('serve:dist', ['default'], () =>
 gulp.task('default', ['clean'], cb =>
   runSequence(
     'styles',
-    ['lint', 'html', 'scripts', 'images', 'copy'],
+    ['html', 'scripts', 'images', 'copy'],
     'generate-service-worker',
     cb
   )
